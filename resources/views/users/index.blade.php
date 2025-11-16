@@ -166,13 +166,13 @@
                     @forelse($admins as $user)
                         <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 relative">
                             @if($user->roleInfo)
-                                <span class="absolute top-4 right-4 px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700">
+                                <span class="absolute top-4 right-4 px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700">
                                     {{ strtoupper($user->roleInfo->role_name) }}
                                 </span>
                             @endif
                             <div class="p-5">
                                 <div class="flex items-center gap-4 mb-5">
-                                    <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold bg-red-500">
+                                    <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold bg-green-500">
                                         {{ strtoupper(substr($user->username, 0, 1)) }}
                                     </div>
                                     <h3 class="text-lg font-semibold text-gray-900 truncate">{{ $user->username }}</h3>
