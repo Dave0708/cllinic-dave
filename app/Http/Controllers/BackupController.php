@@ -14,7 +14,7 @@ class BackupController extends Controller
     public function downloadBackup(Request $request)
     {
         // Define the filename for the backup
-        $fileName = 'backup-' . now()->format('Y-m-d_H-i-s') . '.sql';
+        $fileName = 'clinic-' . now()->format('Y-m-d_H-i-s') . '.sql';
 
     
         // Define the full path where the backup will be temporarily stored

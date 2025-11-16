@@ -7,14 +7,43 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-
 class UserController extends Controller
 {
-    public function index()
-{
-    $users = User::with('roleInfo')->orderBy('created_at', 'desc')->paginate(12);
-    return view('users.index', compact('users'));
-}
+    /**
+     * Show lists grouped by role: admins, staffs, and normal users.
+     * Each group has its own paginator so you can page them separately in the view.
+     */
+    public function index(Request $request)
+    {
+        // Adjust per-page values as you prefer
+        $perPage = 12;
+
+        // Admins
+        $admins = User::with('roleInfo')
+            ->whereHas('roleInfo', function ($q) {
+                $q->where('role_name', 'admin');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'admins_page');
+
+        // Staff
+        $staffs = User::with('roleInfo')
+            ->whereHas('roleInfo', function ($q) {
+                $q->where('role_name', 'staff');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'staffs_page');
+
+        // Normal users (no role or other roles)
+        $normalUsers = User::with('roleInfo')
+            ->whereDoesntHave('roleInfo', function ($q) {
+                $q->whereIn('role_name', ['admin', 'staff']);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'users_page');
+
+        return view('users.index', compact('admins', 'staffs', 'normalUsers'));
+    }
 
     public function create()
     {
@@ -74,20 +103,20 @@ class UserController extends Controller
             ->with('success', 'User updated successfully.');
     }
 
-  public function destroy($id)
-{
-    // Use 'user_id' as the column name since that's your primary key
-    $user = User::where('user_id', $id)->firstOrFail();
+    public function destroy($id)
+    {
+        // Use 'user_id' as the column name since that's your primary key
+        $user = User::where('user_id', $id)->firstOrFail();
 
-    // Check if user is trying to delete their own account
-    if ($user->user_id === auth()->id()) {
+        // Check if user is trying to delete their own account
+        if ($user->user_id === auth()->id()) {
+            return redirect()->route('users.index')
+                ->with('error', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
+
         return redirect()->route('users.index')
-            ->with('error', 'You cannot delete your own account.');
+            ->with('success', 'User deleted successfully.');
     }
-
-    $user->delete();
-
-    return redirect()->route('users.index')
-        ->with('success', 'User deleted successfully.');
-}
 }
