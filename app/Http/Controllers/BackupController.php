@@ -3,52 +3,60 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Spatie\DbDumper\Databases\MySql; // <-- Import the class
-use Symfony\Component\Process\Exception\ProcessFailedException; // <-- Import the class
+use Carbon\Carbon;
 
 class BackupController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function downloadBackup(Request $request)
+    public function downloadBackup()
     {
-        // Define the filename for the backup
-        $fileName = 'clinic' . '.sql';
+        // 1. Setup Paths (Using Windows Temp)
+        $filename = 'clinic'. '.sql';
+        $tempPath = sys_get_temp_dir() . '\\' . $filename; 
+        $mysqldumpPath = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
 
-    
-        // Define the full path where the backup will be temporarily stored
-        $filePath = storage_path('app/' . $fileName);
+        // 2. Database Config
+        $dbName = config('database.connections.mysql.database');
+        $dbUser = config('database.connections.mysql.username');
+        $dbPassword = config('database.connections.mysql.password');
 
-        try {
-            // Get database credentials from your .env file
-            $dbName     = config('database.connections.mysql.database');
-            $userName   = config('database.connections.mysql.username');
-            $password   = config('database.connections.mysql.password');
-            $host       = config('database.connections.mysql.host'); // This is likely 'localhost'
-            $port       = config('database.connections.mysql.port');
-
-            // --- This is the core logic ---
-            MySql::create()
-                ->setDbName($dbName)
-                ->setUserName($userName)
-                ->setPassword($password)
-                // ->setHost($host) // We use the explicit IP below to fix the socket error
-                ->setHost('127.0.0.1') // <-- ADDED THIS LINE to force IPv4 connection
-
-                // ** IMPORTANT: Update this path if your XAMPP is not in C:\xampp **
-                ->setDumpBinaryPath('C:\xampp\mysql\bin') 
-
-                ->dumpToFile($filePath);
-            // --- End of core logic ---
-
-            // Return the file as a download and delete it after sending
-            return response()->download($filePath)->deleteFileAfterSend(true);
-
-        } catch (ProcessFailedException $e) {
-            // Handle any errors
-            report($e);
-            return back()->with('error', 'The database backup failed: ' . $e->getMessage());
+        // 3. Build the Base Command
+        // We use --result-file="path" instead of > "path"
+        // This solves the quoting/redirection issues on Windows
+        $baseCommand = "\"$mysqldumpPath\" --user=\"$dbUser\"";
+        
+        if (!empty($dbPassword)) {
+            $baseCommand .= " --password=\"$dbPassword\"";
         }
+        
+        $baseCommand .= " --result-file=\"$tempPath\"";
+
+        // 4. Attempt 1: Try WITH column-statistics (Modern XAMPP/MariaDB)
+        $command = $baseCommand . " --column-statistics=0 \"$dbName\" 2>&1";
+
+        $output = [];
+        $exitCode = 0;
+        exec($command, $output, $exitCode);
+
+        // 5. Attempt 2: If it failed, Try WITHOUT column-statistics (Older XAMPP/MySQL)
+        if ($exitCode !== 0) {
+            // Clear errors and try again
+            $output = [];
+            $command = $baseCommand . " \"$dbName\" 2>&1";
+            exec($command, $output, $exitCode);
+        }
+
+        // 6. Final Validation
+        if ($exitCode !== 0 || !file_exists($tempPath) || filesize($tempPath) === 0) {
+            // If both attempts failed, show the error
+            dd([
+                'STATUS' => 'BACKUP FAILED',
+                'Exit Code' => $exitCode,
+                'Error Output' => $output, // This should now contain the actual error text
+                'Command' => $command
+            ]);
+        }
+
+        // 7. Download and Delete
+        return response()->download($tempPath)->deleteFileAfterSend(true);
     }
 }

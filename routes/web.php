@@ -6,6 +6,7 @@ use App\Http\Controllers\Login;
 use App\Http\Controllers\Database;
 use App\Http\Controllers\BackupController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,10 +38,12 @@ Route::middleware(['isAdmin'])->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
-    // Backup Route (also requires admin)
-    // Note: Moved this inside the admin group as the name 'admin.db.backup' implies it should be admin-protected.
+    // Backup Route
     Route::get('/admin/backup-database', [BackupController::class, 'downloadBackup'])
          ->name('admin.db.backup');
+
+    // Reports Route (Added here so it is protected by login)
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 });
 
 
