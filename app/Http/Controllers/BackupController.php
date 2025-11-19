@@ -10,7 +10,7 @@ class BackupController extends Controller
     public function downloadBackup()
     {
         // 1. Setup Paths (Using Windows Temp)
-        $filename = 'clinic'. '.sql';
+        $filename = 'clinic_backup_' . Carbon::now()->format('Y-m-d_H-i-s') . '.sql';
         $tempPath = sys_get_temp_dir() . '\\' . $filename; 
         $mysqldumpPath = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
 

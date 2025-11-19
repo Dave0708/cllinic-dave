@@ -5,13 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Tejada Clinic</title>
-    <script src="https://cdn.tailwindcss.com"></script> 
+    
     @vite('resources/css/app.css')
+    
+    {{-- Allows individual pages to inject custom CSS --}}
+    <style>
+        @yield("style")
+    </style>
+    
     @livewireStyles
 </head>
-<body class="tracking-wide">
+<body class="tracking-wide bg-gray-50">
+    
+    <!-- HEADER -->
     <header class="bg-white border-b border-gray-200 h-14 flex items-center px-4 fixed top-0 left-0 right-0 z-10">
-        <button id="toggleBtn" class="p-2 hover:bg-gray-100 rounded-lg">
+        <button id="toggleBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
@@ -19,71 +27,155 @@
         <h2 class="ml-4 text-lg font-semibold text-gray-900">Tejada Dent</h2>
     </header>
 
+    <!-- SIDEBAR -->
     <aside id="sidebar"
         class="peer sidebar bg-white border-r border-gray-200 fixed left-0 top-14 bottom-0 overflow-hidden transition-all duration-300 w-64
             flex flex-col
-            [&.collapsed]:w-16 group z-20">
-        <nav class="mt-10 w-full">
+            [&.collapsed]:w-16 group z-0">
+        
+        {{-- 
+            NOTE: Added 'flex-1' and 'overflow-y-auto' here.
+            This forces the nav to take all available space, pushing the logout section to the bottom.
+        --}}
+        <nav class="mt-10 w-full flex-1 overflow-y-auto">
             <ul class="space-y-3 w-full">
+                
+                <!-- DASHBOARD -->
                 <li>
-                    <a href="/dashboard" class="{{ request()->is('dashboard') ? 'active' : '' }} nav-item flex items-center gap-5 px-3 py-2 relative w-full transition-all duration-300 text-gray-700 hover:bg-gray-100 [&.active]:bg-[#0086DA] [&.active]:text-white group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
+                    <a href="{{ route('dashboard') }}"
+                        class="{{ request()->routeIs('dashboard') ? 'active' : '' }}
+                            nav-item flex items-center gap-5 px-3 py-2 relative w-full
+                            transition-all duration-300
+                            text-gray-700 hover:bg-gray-100
+                            [&.active]:bg-[#0086DA] [&.active]:text-white
+                            group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
                         <span class="flex items-center justify-center w-6 h-6 flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                         </span>
-                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">Dashboard</span>
+                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">
+                            Dashboard
+                        </span>
                     </a>
                 </li>
-                
+
+                <!-- APPOINTMENTS -->
                 <li>
-                    <a href="/appointment" class="{{ request()->is('appointment*') ? 'active' : '' }} nav-item flex items-center gap-5 px-3 py-2 relative w-full transition-all duration-300 text-gray-700 hover:bg-gray-100 [&.active]:bg-[#0086DA] [&.active]:text-white group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
+                    <a href="{{ route('appointment') }}"
+                        class="{{ request()->routeIs('appointment') ? 'active' : '' }}
+                            nav-item flex items-center gap-5 px-3 py-2 relative w-full
+                            transition-all duration-300
+                            text-gray-700 hover:bg-gray-100
+                            [&.active]:bg-[#0086DA] [&.active]:text-white
+                            group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
                         <span class="flex items-center justify-center w-6 h-6 flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg>
                         </span>
-                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">Appointments</span>
+                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">
+                            Appointments
+                        </span>
                     </a>
                 </li>
 
+                <!-- PATIENT RECORDS -->
                 <li>
-                    <a href="/patients" class="{{ request()->is('patients*') ? 'active' : '' }} nav-item flex items-center gap-5 px-3 py-2 relative w-full transition-all duration-300 text-gray-700 hover:bg-gray-100 [&.active]:bg-[#0086DA] [&.active]:text-white group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
+                    <a href="{{ route('patients.index') }}"
+                        class="{{ request()->routeIs('patients.*') ? 'active' : '' }}
+                            nav-item flex items-center gap-5 px-3 py-2 relative w-full
+                            transition-all duration-300
+                            text-gray-700 hover:bg-gray-100
+                            [&.active]:bg-[#0086DA] [&.active]:text-white
+                            group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
                         <span class="flex items-center justify-center w-6 h-6 flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
                         </span>
-                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">Patient Records</span>
+                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">
+                            Patient Records
+                        </span>
                     </a>
                 </li>
 
+                <!-- REPORTS -->
                 <li>
-                    <a href="/reports" class="{{ request()->is('reports*') ? 'active' : '' }} nav-item flex items-center gap-5 px-3 py-2 relative w-full transition-all duration-300 text-gray-700 hover:bg-gray-100 [&.active]:bg-[#0086DA] [&.active]:text-white group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
+                    <a href="{{ route('reports.index') }}"
+                        class="{{ request()->routeIs('reports.*') ? 'active' : '' }}
+                            nav-item flex items-center gap-5 px-3 py-2 relative w-full
+                            transition-all duration-300
+                            text-gray-700 hover:bg-gray-100
+                            [&.active]:bg-[#0086DA] [&.active]:text-white
+                            group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
                         <span class="flex items-center justify-center w-6 h-6 flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-line"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>
                         </span>
-                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">Reports</span>
+                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">
+                            Reports
+                        </span>
                     </a>
                 </li>
 
+                <!-- USER ACCOUNTS -->
                 <li>
-                    <a href="{{ route('users.index') }}" class="{{ request()->is('users*') ? 'active' : '' }} nav-item flex items-center gap-5 px-3 py-2 relative w-full transition-all duration-300 text-gray-700 hover:bg-gray-100 [&.active]:bg-[#0086DA] [&.active]:text-white group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
+                    <a href="{{ route('users.index') }}"
+                        class="{{ request()->routeIs('users.*') ? 'active' : '' }}
+                            nav-item flex items-center gap-5 px-3 py-2 relative w-full
+                            transition-all duration-300
+                            text-gray-700 hover:bg-gray-100
+                            [&.active]:bg-[#0086DA] [&.active]:text-white
+                            group-[.collapsed]:px-5 group-[.collapsed]:gap-0">
                         <span class="flex items-center justify-center w-6 h-6 flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         </span>
-                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">User Accounts</span>
+                        <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">
+                            User Accounts
+                        </span>
                     </a>
                 </li>
+
             </ul>
         </nav>
+
+        <!-- LOGOUT SECTION (Sticky Bottom) -->
+        <!-- Ensure you have Route::post('/logout', ...) defined in web.php -->
+        <div class="border-t border-gray-200 p-2">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" 
+                    class="nav-item flex items-center gap-5 px-3 py-2 relative w-full
+                        transition-all duration-300
+                        text-red-600 hover:bg-red-50
+                        group-[.collapsed]:px-5 group-[.collapsed]:gap-0 rounded-lg">
+                    
+                    <span class="flex items-center justify-center w-6 h-6 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    </span>
+                    <span class="nav-text whitespace-nowrap text-xl overflow-hidden transition-all duration-300 group-[.collapsed]:w-0 group-[.collapsed]:opacity-0">
+                        Logout
+                    </span>
+                </button>
+            </form>
+        </div>
+
     </aside>
 
-    @yield("content")
+    {{-- MAIN CONTENT WRAPPER --}}
+    <main class="mt-14 ml-64 transition-all duration-300 peer-[.collapsed]:ml-16 min-h-screen p-6">
+        {{-- This is where the specific page content (like the user table) will appear --}}
+        @yield("content")
+    </main>
 
     @stack('script')
+    
     <script>
         (function(){
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('toggleBtn');
+
             if (!sidebar || !toggleBtn) return;
+
+            // Check local storage for preference
             if (localStorage.getItem('sidebar-collapsed') === 'true') {
                 sidebar.classList.add('collapsed');
             }
+            
             toggleBtn.addEventListener('click', function () {
                 sidebar.classList.toggle('collapsed');
                 localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));

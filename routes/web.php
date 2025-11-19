@@ -1,52 +1,57 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+// --- Import Your Controllers ---
+use App\Http\Controllers\Login;
 use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Login;
-use App\Http\Controllers\Database;
-use App\Http\Controllers\BackupController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PatientsController; 
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BackupController;
+use App\Http\Controllers\AppointmentController; // Optional: If you create one later
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
-// Routes protected by the 'isAdmin' middleware
-Route::middleware(['isAdmin'])->group(function () {
-    
-    // Dashboard
-    Route::get('/dashboard', [Dashboard::class, 'index']);
-    
-    // Appointment
-    Route::get('/appointment', function () {
-        return view('appointment');
-    });
-    
-    // User Management Routes
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+// 1. Login Page (Guest only)
+Route::get('/', [Login::class, 'index'])->name('login');
+Route::post('/login', [Login::class, 'login'])->name('login.submit');
 
-    // Backup Route
-    Route::get('/admin/backup-database', [BackupController::class, 'downloadBackup'])
+// 2. Logout Route (Must be POST for security)
+Route::post('/logout', [Login::class, 'logout'])->name('logout');
+
+// 3. Protected Routes (Only accessible after login)
+// You can add 'middleware' => 'auth' or your custom 'isAdmin' middleware here
+Route::group(['middleware' => ['isAdmin']], function () {
+
+    // --- Dashboard ---
+    Route::get('/dashboard', [Dashboard::class, 'index'])->name('dashboard');
+
+    // --- Appointments ---
+    // If you don't have a controller yet, we can just return the view directly
+    Route::get('/appointments', function () {
+        return view('appointment');
+    })->name('appointment');
+
+    // --- Patient Records ---
+    Route::get('/patient-records', [PatientsController::class, 'index'])->name('patients.index');
+
+    // --- Reports ---
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/admin/backup-database', [BackupController::class, 'downloadBackup'])
          ->name('admin.db.backup');
 
-    // Reports Route (Added here so it is protected by login)
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    // --- User Accounts (Admins & Staff) ---
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+    });
+
 });
-
-
-// Public / Auth Routes
-Route::get('/', [Login::class, 'index']);
-Route::post('/login', [Login::class, 'login']);
